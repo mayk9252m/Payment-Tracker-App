@@ -1,0 +1,114 @@
+#:import dp kivy.metrics.dp
+<TrackerUI>:
+    orientation: "vertical"
+    padding: dp(12)
+    spacing: dp(8)
+
+    BoxLayout:
+        size_hint_y: None
+        height: dp(56)
+        canvas.before:
+            Color:
+                rgba: .12, .6, .86, 1
+            Rectangle:
+                pos: self.pos
+                size: self.size
+        Label:
+            text: "Payment Tracker"
+            bold: True
+            color: 1,1,1,1
+            font_size: '18sp'
+
+    BoxLayout:
+        size_hint_y: None
+        height: dp(80)
+        spacing: dp(8)
+        canvas.before:
+            Color:
+                rgba: .95, .95, .95, 1
+            Rectangle:
+                pos: self.pos
+                size: self.size
+
+        BoxLayout:
+            orientation: "vertical"
+            padding: dp(8)
+            Label:
+                text: root.balance_text
+                font_size: '22sp'
+                bold: True
+            Label:
+                text: "Current Balance"
+                font_size: '12sp'
+                color: .4,.4,.4,1
+
+        BoxLayout:
+            orientation: "vertical"
+            size_hint_x: .45
+            padding: dp(8)
+            TextInput:
+                id: input_amount
+                hint_text: "Amount"
+                input_filter: 'float'
+                multiline: False
+            TextInput:
+                id: input_desc
+                hint_text: "Description (optional)"
+                multiline: False
+
+    BoxLayout:
+        size_hint_y: None
+        height: dp(44)
+        spacing: dp(8)
+        Button:
+            text: "Add Income"
+            on_release: root.add_income()
+        Button:
+            text: "Deduct Expense"
+            on_release: root.deduct_expense()
+        Button:
+            text: "Export"
+            on_release: root.export_data()
+
+    Label:
+        id: status
+        text: ""
+        size_hint_y: None
+        height: dp(22)
+        color: .2, .2, .2, 1
+
+    Label:
+        text: "Transactions"
+        size_hint_y: None
+        height: dp(28)
+        bold: True
+
+    ScrollView:
+        GridLayout:
+            id: tx_container
+            cols: 1
+            size_hint_y: None
+            height: self.minimum_height
+            row_default_height: dp(56)
+            row_force_default: True
+            spacing: dp(6)
+            padding: dp(6)
+            # dynamic population via on_kv_post
+            on_children:
+                pass
+
+            # We'll populate via binding in python by referencing root.transactions
+            # But for simplicity we'll use a repeated template via canvas instructions
+            # The python code updates root.transactions (ListProperty). We'll use a simple loop
+            # to create children at runtime. To keep KV concise we create them programmatically.
+
+    BoxLayout:
+        size_hint_y: None
+        height: dp(52)
+        spacing: dp(8)
+        Button:
+            text: "Clear All"
+            on_release: root.clear_all()
+        Button:
+            text: "Refresh"
+            on_release: root.refresh_view()
