@@ -56,6 +56,9 @@ class TrackerUI(BoxLayout):
             })
         self.transactions = formatted
 
+        # rebuild the on-screen history rows in the existing ScrollView
+        self.rebuild_history(formatted)
+
     def add_income(self):
         amt = self.ids.input_amount.text.strip()
         desc = self.ids.input_desc.text.strip() or "Income"
