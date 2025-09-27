@@ -38,18 +38,21 @@ class TrackerUI(BoxLayout):
         self.refresh_view()
 
     def refresh_view(self):
+        # update the balance label at the top
         bal = self.store.get_balance()
         self.balance_text = f"Rs {bal:.2f}"
+
+        # get transactions newest first
         txns = self.store.get_transactions()
+        # keep a linghtweight list for any other uses
         formatted = []
         for t in txns:
-            date = t.get("date", "")
-            # if legacy txns don't have date, show blank
+            sign_amount = f"+{t['amount']:.2f}" if t['type'] =='credit' else f" -{t['amount']:.2f}"
             formatted.append({
                 "desc": t.get("description", ""),
-                "amount": f"+{t['amount']:.2f}" if t['type']=='credit' else f"-{t['amount']:.2f}",
+                "amount": sign_amount,
                 "ttype": t.get("type", ""),
-                "date": date
+                "date": t.get("date", "")
             })
         self.transactions = formatted
 
