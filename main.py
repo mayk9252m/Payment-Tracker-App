@@ -17,9 +17,13 @@ def default_data_path(app):
     return os.path.join(app.user_data_dir, 'payment_data.json')
 
 class TransactionRow(BoxLayout):
+    # description text (eg., "Groceries" or  "salary")
     desc = StringProperty('')
+    # human-reabable amount (eg., "+500.00" or "-120.00")
     amount = StringProperty('')
-    ttype = StringProperty('')  # credit / debit
+    # "credit" or "debit"
+    ttype = StringProperty('')
+    # date-time string (eg., "2025-09-27 11:15")
     date = StringProperty('')
 
 class TrackerUI(BoxLayout):
