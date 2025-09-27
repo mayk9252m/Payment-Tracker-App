@@ -125,6 +125,31 @@ class TrackerUI(BoxLayout):
         except Exception as e:
             self.ids.status.text = f"Export failed: {e}"
 
+    def rebuild_history(self, items):
+        """
+        Populate the ScrollView (id: tx_container) with TransactionRow widgets.
+        This uses the exixting "Transactions" area and does not change layout.
+        """
+        container = self.ids.tx_container
+        container.clear_widgets()
+        if not items:
+            # Optional: empty state
+            from kivy.uix.label import Label
+            container.add_widget(Label(
+                text="No transactions yet",
+                size_hint_y=None,
+                height=56
+            ))
+            return
+        for it in items:
+            row = TransactionRow(
+                desc=it["desc"],
+                amount=it["amount"],
+                ttype=it["ttype"], # "credit" or "debit"
+                date=it["date"]
+            )
+            container.add_widget(row)
+
 class PaymentTrackerApp(App):
     def build(self):
         self.title = "Payment Tracker"
