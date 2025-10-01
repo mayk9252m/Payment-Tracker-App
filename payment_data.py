@@ -69,7 +69,7 @@ class PaymentData:
             dst.write(content)
         return target_path
 
-    def import_excel(self, target_path):
+    def export_excel(self, target_path):
         """
         Export all stored transactions to an Excel file. at target_path using openpyxl.
         Returns the saved file path on success or raise an exception on failure.
