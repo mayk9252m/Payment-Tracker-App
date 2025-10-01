@@ -1,6 +1,7 @@
 # payment_data.py
 import json
 import os
+from sysconfig import get_path
 
 class PaymentData:
     def __init__(self, filepath):
@@ -66,4 +67,56 @@ class PaymentData:
             os.makedirs(directory, exist_ok=True)
         with open(target_path, 'w', encoding='utf-8') as dst:
             dst.write(content)
+        return target_path
+
+    def import_excel(self, target_path):
+        """
+        Export all stored transactions to an Excel file. at target_path using openpyxl.
+        Returns the saved file path on success or raise an exception on failure.
+        """
+        from openpyxl import Workbook
+
+        # Create a workbook and a sheet
+        wb = Workbook()
+        ws = wb.active
+        ws.title = "Transactions"
+
+        # Header row
+        ws.append(["Date", "Type", "Amount", "Description"])
+
+        # Write rows (preserve insertion order as stored)
+        for t in self.data.get("transactions", []):
+            # Ensure values exist and convert amount to float for numeric cell
+            data = t.get("date", "")
+            ttype = t.get("type", "")
+            # Some legacy records may store amount as string
+            try:
+                amount = float(t.get("amount", 0))
+            except (ValueError, TypeError):
+                amount = 0.0
+            desc = t.get("description", "")
+            ws.append([data, ttype, amount, desc])
+
+        # Auto-adjust column widths
+        for col in ws.columns:
+            max_length = 0
+            col = list(col)
+            for cell in col:
+                try:
+                    val = str(cell.value)
+                except Exception:
+                    val = ""
+                if val and len(val) > max_length:
+                    max_length = len(val)
+            adjusted_width = (max_length + 2)
+            column_letter = col[0].column_letter
+            ws.column_dimensions[column_letter].width = adjusted_width
+
+    # Ensure target directory exists, then save
+        import os
+        directory = os.path.dirname(target_path)
+        if directory and not os.path.exists(directory):
+            os.makedirs(directory, exist_ok=True)
+
+        wb.save(target_path)
         return target_path
