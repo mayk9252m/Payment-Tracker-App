@@ -110,45 +110,33 @@ class TrackerUI(BoxLayout):
         self.refresh_view()
 
     def export_data(self):
-        # try to export to /sdcard/Download on Android, else to user_data_dir
+        """
+        Export to an .xlsx file. Attempt to save to /sdcard/Download on Android,
+        otherwise use the app user_data_dir. Shows status in the app (ids.status).
+        """
+        from datetime import datetime
+        import os
+        from kivy.utils import platform
+
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        filename = f"payment_data_{timestamp}.xlsx"
+
         target = None
         if platform == 'android':
-            # common external path
             external = '/sdcard/Download'
-            if os.path.exists(external):
-                target = os.path.join(external, f'payment_data_export_{datetime.now().strftime("%Y%m%d_%H%M%S")}.json')
+            if os.path.exists(external) and os.access(external, os.W_OK):
+                target = os.path.join(external, filename)
+
         if not target:
-            target = os.path.join(App.get_running_app().user_data_dir, f'payment_data_export_{datetime.now().strftime("%Y%m%d_%H%M%S")}.json')
+            # fallback to app data dir
+            target = os.path.join(App.get_running_app().user_data_dir, filename)
+
         try:
-            path = self.store.export_json(target)
+            path = self.store.export_excel(target)
             self.ids.status.text = f"Export saved: {path}"
         except Exception as e:
-            self.ids.status.text = f"Export failed: {e}"
-
-    def rebuild_history(self, items):
-        """
-        Populate the ScrollView (id: tx_container) with TransactionRow widgets.
-        This uses the exixting "Transactions" area and does not change layout.
-        """
-        container = self.ids.tx_container
-        container.clear_widgets()
-        if not items:
-            # Optional: empty state
-            from kivy.uix.label import Label
-            container.add_widget(Label(
-                text="No transactions yet",
-                size_hint_y=None,
-                height=56
-            ))
-            return
-        for it in items:
-            row = TransactionRow(
-                desc=it["desc"],
-                amount=it["amount"],
-                ttype=it["ttype"], # "credit" or "debit"
-                date=it["date"]
-            )
-            container.add_widget(row)
+            # show a readable short error in the status label
+            self.ids.status.text = f"Export failed: {str(e)}"
 
 class PaymentTrackerApp(App):
     def build(self):
